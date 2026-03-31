@@ -30,4 +30,51 @@ const createNote=async(req:Request,res:Response,next:NextFunction)=>{
         }
 }
 
-export  {createNote}
+
+const listNotes=async(req:Request,res:Response,next:NextFunction)=>{
+    try{
+        const notes=await noteModel.find()
+        res.status(200).json({
+            message:"Notes fetched successfully",
+            data:notes
+        })
+    }
+    catch(error){
+        console.log(error)
+        return next(createHttpError(500,"Error while fetching...."))
+    }
+}
+const listNote=async(req:Request,res:Response,next:NextFunction)=>{
+    try{
+        const {id}=req.params
+        const note=await noteModel.findById(id)
+        if(!note){
+            return next(createHttpError(404,"Note not found"))
+        }
+        res.status(200).json({
+            message:"Notes fetched successfully",
+            data:note
+        })
+    }
+    catch(error){
+        console.log(error)
+        return next(createHttpError(500,"Error while fetching...."))
+    }
+}
+const deleteNote=async(req:Request,res:Response,next:NextFunction)=>{
+    try{
+        const {id}=req.params
+        const note=await noteModel.findByIdAndDelete(id)
+        if(!note){
+            return next(createHttpError(404,"Note not found"))
+        }
+        res.status(200).json({
+            message:"Notes deleted successfully"
+        })
+    }
+    catch(error){
+        console.log(error)
+        return next(createHttpError(500,"Error while fetching...."))
+    }
+}
+export  {createNote, listNotes,listNote,deleteNote}
