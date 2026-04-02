@@ -1,5 +1,5 @@
 import express from "express"
-import { createNote, deleteNote, listNote, listNotes } from "./noteController"
+import { createNote, deleteNote, editNote, listNote, listNotes } from "./noteController"
 import {multer,storage} from "./../middlewares/multerMiddleware"
 
 const noteRoute=express.Router()
@@ -11,6 +11,7 @@ noteRoute.route("/")
 noteRoute.route("/:id")
 .get(listNote)
 .delete(deleteNote)
+.put(editNote)
 
 
 export default noteRoute
