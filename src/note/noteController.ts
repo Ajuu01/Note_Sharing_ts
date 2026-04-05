@@ -1,9 +1,9 @@
-import { NextFunction, Request, Response } from "express"
-import noteModel from "./noteModel"
-import envConfig from "../config/config"
-import createHttpError from "http-errors"
-import fs from "fs"
-import path from "path"
+import { NextFunction, Request, Response } from "express";
+import noteModel from "./noteModel";
+import envConfig from "../config/config";
+import createHttpError from "http-errors";
+import fs from "fs";
+import path from "path";
 
 const createNote = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -11,13 +11,13 @@ const createNote = async (req: Request, res: Response, next: NextFunction) => {
       ? `${envConfig.backendUrl}/${req.file.filename}`
       : "https://www.freepik.com/photos";
 
-    const { title, subtitle, description } = req.body
+    const { title, subtitle, description } = req.body;
 
     if (!title || !subtitle || !description || title === undefined) {
       res.status(400).json({
         message: "Please provide all fields",
       });
-      return
+      return;
     }
 
     await noteModel.create({
@@ -31,71 +31,72 @@ const createNote = async (req: Request, res: Response, next: NextFunction) => {
       message: "Note created",
     });
   } catch (error) {
-    console.log(error)
-    return next(createHttpError(500, "Error while creating"))
+    console.log(error);
+    return next(createHttpError(500, "Error while creating"));
   }
 };
 
 const listNotes = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const notes = await noteModel.find()
+    const notes = await noteModel.find();
     res.status(200).json({
       message: "Notes fetched successfully",
       data: notes,
-    })
+    });
   } catch (error) {
-    console.log(error)
-    return next(createHttpError(500, "Error while fetching...."))
+    console.log(error);
+    return next(createHttpError(500, "Error while fetching...."));
   }
-}
+};
 
 const listNote = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const note = await noteModel.findById(id);
-    if (!note) {
-      return next(createHttpError(404, "Note not found"))
-    }
-    res.status(200).json({
-      message: "Notes fetched successfully",
-      data: note,
-    });
-  } catch (error) {
-    console.log(error)
-    return next(createHttpError(500, "Error while fetching...."))
-  }
-};
-
-const editNote = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { id } = req.params
-    const { title, subtitle, description } = req.body
-
-    const note = await noteModel.findById(id)
 
     if (!note) {
       return next(createHttpError(404, "Note not found"));
     }
 
-    let updatedFile = note.file
+    res.status(200).json({
+      message: "Notes fetched successfully",
+      data: note,
+    });
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, "Error while fetching...."));
+  }
+};
 
-    // if new image uploaded, delete old image
+const editNote = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { title, subtitle, description } = req.body;
+
+    const note = await noteModel.findById(id);
+
+    if (!note) {
+      return next(createHttpError(404, "Note not found"));
+    }
+
+    let updatedFile = note.file;
+
+    // If new image uploaded, delete old image first
     if (req.file) {
-      if (
-        note.file &&
-        !note.file.includes("freepik.com")
-      ) {
-        const oldFileName = note.file.split("/").pop();
+      if (note.file && !note.file.includes("freepik.com")) {
+        const oldFileName = note.file.split("/").pop();;
+        console.log(oldFileName);
         if (oldFileName) {
-          const oldFilePath = path.join(process.cwd(), "uploads", oldFileName)
-
+          const oldFilePath = path.join(process.cwd(),"src","uploads", oldFileName);
+          console.log(oldFilePath);
           if (fs.existsSync(oldFilePath)) {
             fs.unlinkSync(oldFilePath);
+            console.log("deleted")
           }
         }
       }
 
-      updatedFile = `${envConfig.backendUrl}/${req.file.filename}`
+      updatedFile = `${envConfig.backendUrl}/${req.file.filename}`;
     }
 
     const updatedNote = await noteModel.findByIdAndUpdate(
@@ -130,30 +131,27 @@ const deleteNote = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     // delete image if it's uploaded image
-    if (
-      note.file &&
-      !note.file.includes("freepik.com")
-    ) {
+    if (note.file && !note.file.includes("freepik.com")) {
       const fileName = note.file.split("/").pop();
 
       if (fileName) {
-        const filePath = path.join(process.cwd(), "uploads", fileName);
+        const filePath = path.join(process.cwd(),"src","uploads", fileName);
 
         if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath)
+          fs.unlinkSync(filePath);
         }
       }
     }
 
-    await noteModel.findByIdAndDelete(id)
+    await noteModel.findByIdAndDelete(id);
 
     res.status(200).json({
       message: "Notes deleted successfully",
     });
   } catch (error) {
-    console.log(error)
-    return next(createHttpError(500, "Error while fetching...."))
+    console.log(error);
+    return next(createHttpError(500, "Error while fetching...."));
   }
 };
 
-export { createNote, listNotes, listNote, editNote, deleteNote }
+export { createNote, listNotes, listNote, editNote, deleteNote };

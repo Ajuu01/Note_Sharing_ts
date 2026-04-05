@@ -11,7 +11,7 @@ noteRoute.route("/")
 noteRoute.route("/:id")
 .get(listNote)
 .delete(deleteNote)
-.put(editNote)
+.put(upload.single("file"),editNote)
 
 
 export default noteRoute
