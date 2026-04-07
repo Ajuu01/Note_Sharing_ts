@@ -35,7 +35,7 @@ const SingleNote = async ({
               <img
                 src={note.file}
                 alt={note.title}
-                className="w-full h-[400px] object-cover rounded-lg"
+                className="w-full h-400 object-cover rounded-lg"
               />
 
               <div className="flex flex-wrap gap-4 mt-4">
